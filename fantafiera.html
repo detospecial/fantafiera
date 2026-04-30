@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FantaFiera – Salone del Libro Edition · De Tomi Editore</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f7f5f2;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 16px;
+      border: 0.5px solid rgba(0,0,0,0.1);
+      padding: 2rem;
+    }
+
+    /* Header */
+    .header {
+      padding-bottom: 1.25rem;
+      border-bottom: 0.5px solid rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+    }
+    .header-top {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .header h1 {
+      font-size: 20px;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+    .badge-purple {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 9px;
+      border-radius: 8px;
+      background: #EEEDFE;
+      color: #3C3489;
+      font-weight: 500;
+    }
+    .header p {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 1.5rem;
+    }
+    .tab {
+      padding: 6px 14px;
+      font-size: 13px;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.15);
+      background: transparent;
+      color: #666;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .tab.active {
+      background: #f2f0ed;
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+    .tab:hover:not(.active) { background: #f7f5f2; }
+
+    /* Form fields */
+    .info-line {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 8px;
+    }
+    .field-row {
+      margin-bottom: 12px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="number"] {
+      width: 100%;
+      height: 38px;
+      padding: 0 12px;
+      font-size: 15px;
+      font-family: inherit;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      border-radius: 8px;
+      background: #fff;
+      color: #1a1a1a;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="number"] {
+      text-align: center;
+      font-weight: 500;
+      padding: 0 6px;
+    }
+    input:focus { border-color: rgba(83,74,183,0.6); box-shadow: 0 0 0 3px rgba(83,74,183,0.1); }
+    input::placeholder { color: #bbb; }
+
+    /* Days grid */
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 10px;
+      margin: 1.25rem 0;
+    }
+    .day-card {
+      background: #fff;
+      border: 0.5px solid rgba(0,0,0,0.1);
+      border-radius: 12px;
+      padding: 0.875rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .day-label { font-size: 13px; color: #555; font-weight: 500; }
+    .day-date  { font-size: 11px; color: #999; }
+    .day-hint  { font-size: 11px; color: #aaa; margin-top: 2px; }
+    .day-persona { font-size: 11px; font-weight: 500; min-height: 16px; }
+    .day-ottimista { color: #085041; }
+    .day-pessimista { color: #791F1F; }
+
+    /* Total card */
+    .total-card {
+      background: #f7f5f2;
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .total-label { font-size: 14px; color: #666; }
+    .total-sub   { font-size: 11px; color: #aaa; margin-top: 2px; }
+    .total-val   { font-size: 22px; font-weight: 500; color: #1a1a1a; text-align: right; }
+
+    /* Persona badges */
+    .badge-ottimista { display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;background:#E1F5EE;color:#085041;font-weight:500; }
+    .badge-pessimista{ display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;background:#FCEBEB;color:#791F1F;font-weight:500; }
+    .badge-equilib   { display:inline-block;font-size:11px;padding:2px 8px;border-radius:8px;background:#EEEDFE;color:#3C3489;font-weight:500; }
+
+    /* Submit button */
+    .submit-btn {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      background: transparent;
+      color: #1a1a1a;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .submit-btn:hover  { background: #f2f0ed; }
+    .submit-btn:active { transform: scale(0.98); }
+
+    #msg {
+      font-size: 14px;
+      min-height: 20px;
+      text-align: center;
+      margin-top: 0.75rem;
+      color: #0F6E56;
+    }
+    #msg.err { color: #A32D2D; }
+
+    .fine-print {
+      font-size: 11px;
+      color: #bbb;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    /* Leaderboard */
+    .lb-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 0.5px solid rgba(0,0,0,0.08);
+    }
+    .lb-rank  { font-size: 13px; color: #aaa; min-width: 20px; text-align: right; }
+    .lb-name  { font-size: 14px; font-weight: 500; color: #1a1a1a; }
+    .lb-days  { font-size: 11px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+    .lb-tot   { font-size: 13px; color: #666; white-space: nowrap; }
+
+    .empty-state {
+      font-size: 13px;
+      color: #aaa;
+      text-align: center;
+      padding: 1.5rem 0;
+    }
+
+    /* Loading */
+    .loading { font-size: 13px; color: #aaa; text-align: center; padding: 1rem 0; }
+
+    /* Firebase config notice */
+    .config-notice {
+      background: #FAEEDA;
+      border: 0.5px solid #EF9F27;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #633806;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    .config-notice strong { font-weight: 500; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="config-notice" id="config-notice">
+    <strong>Configurazione richiesta:</strong> sostituisci i valori Firebase in fondo al file con le credenziali del tuo progetto. <a href="https://console.firebase.google.com/" target="_blank" style="color:#854F0B">Vai a Firebase Console →</a>
+  </div>
+
+  <div class="header">
+    <div class="header-top">
+      <h1>FantaFiera</h1>
+      <span class="badge-purple">Salone del Libro Edition</span>
+    </div>
+    <p>Quante copie vende De Tomi Editore ogni giorno in fiera? E in totale?<br>
+    Inserisci il tuo pronostico e divertiti giocando con noi. Sarai un ottimista o un pessimista?</p>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('form')">Il mio pronostico</button>
+    <button class="tab" onclick="switchTab('lb')">Pronostici <span id="lb-count" style="font-size:11px;color:#aaa"></span></button>
+  </div>
+
+  <!-- FORM TAB -->
+  <div id="tab-form">
+    <p class="info-line">Il tuo nome o nickname</p>
+    <div class="field-row">
+      <input type="text" id="nome" placeholder="es. Mario R." maxlength="32">
+    </div>
+    <p class="info-line" style="margin-top:10px">La tua email (per la classifica finale)</p>
+    <div class="field-row">
+      <input type="email" id="email" placeholder="mario@esempio.it">
+    </div>
+
+    <p class="info-line" style="margin-top:14px">Copie vendute ogni giorno</p>
+    <div class="days-grid">
+      <div class="day-card">
+        <span class="day-label">Giovedì</span>
+        <span class="day-date">14 maggio</span>
+        <input type="number" id="g1" min="0" max="9999" placeholder="0" oninput="onDayInput(0)">
+        <span class="day-hint">soglia: 25</span>
+        <span class="day-persona" id="p1"></span>
+      </div>
+      <div class="day-card">
+        <span class="day-label">Venerdì</span>
+        <span class="day-date">15 maggio</span>
+        <input type="number" id="g2" min="0" max="9999" placeholder="0" oninput="onDayInput(1)">
+        <span class="day-hint">soglia: 100</span>
+        <span class="day-persona" id="p2"></span>
+      </div>
+      <div class="day-card">
+        <span class="day-label">Sabato</span>
+        <span class="day-date">16 maggio</span>
+        <input type="number" id="g3" min="0" max="9999" placeholder="0" oninput="onDayInput(2)">
+        <span class="day-hint">soglia: 150</span>
+        <span class="day-persona" id="p3"></span>
+      </div>
+      <div class="day-card">
+        <span class="day-label">Domenica</span>
+        <span class="day-date">17 maggio</span>
+        <input type="number" id="g4" min="0" max="9999" placeholder="0" oninput="onDayInput(3)">
+        <span class="day-hint">soglia: 100</span>
+        <span class="day-persona" id="p4"></span>
+      </div>
+      <div class="day-card">
+        <span class="day-label">Lunedì</span>
+        <span class="day-date">18 maggio</span>
+        <input type="number" id="g5" min="0" max="9999" placeholder="0" oninput="onDayInput(4)">
+        <span class="day-hint">soglia: 50</span>
+        <span class="day-persona" id="p5"></span>
+      </div>
+    </div>
+
+    <div class="total-card">
+      <div>
+        <div class="total-label">Totale 5 giorni</div>
+        <div class="total-sub">calcolato automaticamente</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+        <div class="total-val" id="tot-display">—</div>
+        <div id="tot-persona"></div>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="submit()">Invia il mio pronostico</button>
+    <div id="msg"></div>
+    <p class="fine-print">La classifica finale verrà stilata dopo il 18 maggio.</p>
+  </div>
+
+  <!-- LEADERBOARD TAB -->
+  <div id="tab-lb" style="display:none">
+    <p class="info-line" id="lb-subtitle">Partecipanti · classifica definitiva dopo il 18 maggio</p>
+    <div id="lb-list"><div class="loading">Caricamento...</div></div>
+    <p style="font-size:12px;color:#bbb;margin-top:1rem;text-align:center">
+      La posizione finale sarà calcolata confrontando il totale reale con quello di ciascun partecipante.
+    </p>
+  </div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ============================================================
+  // SOSTITUISCI QUI CON LE TUE CREDENZIALI FIREBASE
+  // (Firebase Console → Progetto → Impostazioni → App web)
+  // ============================================================
+  const firebaseConfig = {
+    apiKey:            "LA-TUA-API-KEY",
+    authDomain:        "IL-TUO-PROGETTO.firebaseapp.com",
+    projectId:         "IL-TUO-PROGETTO-ID",
+    storageBucket:     "IL-TUO-PROGETTO.appspot.com",
+    messagingSenderId: "IL-TUO-SENDER-ID",
+    appId:             "LA-TUA-APP-ID"
+  };
+  // ============================================================
+
+  const SOGLIE = [25, 100, 150, 100, 50];
+  const GIORNI = ['Gio','Ven','Sab','Dom','Lun'];
+
+  let db;
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+  } catch(e) {
+    document.getElementById('config-notice').style.display = 'block';
+  }
+
+  // Esponi funzioni al contesto globale
+  window.SOGLIE = SOGLIE;
+  window.GIORNI = GIORNI;
+  window.db = db;
+  window.firestoreAdd = addDoc;
+  window.firestoreQuery = query;
+  window.firestoreGet = getDocs;
+  window.firestoreCollection = collection;
+  window.firestoreOrderBy = orderBy;
+  window.firestoreWhere = where;
+  window.firebaseReady = true;
+
+  if (document.getElementById('tab-lb').style.display !== 'none') {
+    window.renderLb();
+  }
+</script>
+
+<script>
+  const SOGLIE = [25, 100, 150, 100, 50];
+  const GIORNI = ['Gio','Ven','Sab','Dom','Lun'];
+
+  function getVal(i) { return Math.max(0, parseInt(document.getElementById('g'+(i+1)).value) || 0); }
+
+  function personaDay(val, soglia) {
+    if (val === 0) return null;
+    return val >= soglia
+      ? { label: 'Ottimista',  cls: 'day-ottimista' }
+      : { label: 'Pessimista', cls: 'day-pessimista' };
+  }
+
+  function personaTotale(vals) {
+    const otts = vals.filter((v,i) => v > 0 && v >= SOGLIE[i]).length;
+    const pess = vals.filter((v,i) => v > 0 && v <  SOGLIE[i]).length;
+    if (otts === 0 && pess === 0) return null;
+    if (otts > pess)  return { label: 'Ottimista',   cls: 'badge-ottimista' };
+    if (pess > otts)  return { label: 'Pessimista',  cls: 'badge-pessimista' };
+    return { label: 'Equilibrato', cls: 'badge-equilib' };
+  }
+
+  window.onDayInput = function(idx) {
+    const val = getVal(idx);
+    const el  = document.getElementById('p'+(idx+1));
+    const p   = personaDay(val, SOGLIE[idx]);
+    if (p) { el.textContent = p.label; el.className = 'day-persona ' + p.cls; }
+    else   { el.textContent = ''; el.className = 'day-persona'; }
+    calcTot();
+  };
+
+  function calcTot() {
+    const vals = [0,1,2,3,4].map(i => getVal(i));
+    const tot  = vals.reduce((a,b) => a+b, 0);
+    document.getElementById('tot-display').textContent = tot > 0 ? tot : '—';
+    const p  = personaTotale(vals);
+    const el = document.getElementById('tot-persona');
+    el.innerHTML = p ? `<span class="${p.cls}">${p.label}</span>` : '';
+    return { vals, tot };
+  }
+
+  window.switchTab = function(t) {
+    document.querySelectorAll('.tab').forEach((b,i) =>
+      b.classList.toggle('active', (i===0&&t==='form') || (i===1&&t==='lb'))
+    );
+    document.getElementById('tab-form').style.display = t === 'form' ? 'block' : 'none';
+    document.getElementById('tab-lb').style.display   = t === 'lb'   ? 'block' : 'none';
+    if (t === 'lb') renderLb();
+  };
+
+  function showMsg(txt, err) {
+    const el = document.getElementById('msg');
+    el.textContent = txt;
+    el.className = err ? 'err' : '';
+  }
+
+  function validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+  function escHtml(s)    { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  window.submit = async function() {
+    const nome  = document.getElementById('nome').value.trim();
+    const email = document.getElementById('email').value.trim();
+    if (!nome)                    { showMsg('Inserisci il tuo nome o nickname.', true); return; }
+    if (!email || !validEmail(email)) { showMsg('Inserisci un indirizzo email valido.', true); return; }
+
+    const { vals, tot } = calcTot();
+    if (vals.every(v => v === 0)) { showMsg('Inserisci almeno un pronostico giornaliero.', true); return; }
+
+    if (!window.db) { showMsg('Configura Firebase per salvare i dati.', true); return; }
+
+    // Controlla email duplicata
+    try {
+      const q   = window.firestoreQuery(
+        window.firestoreCollection(window.db, 'pronostici'),
+        window.firestoreWhere('email', '==', email.toLowerCase())
+      );
+      const snap = await window.firestoreGet(q);
+      if (!snap.empty) { showMsg('Hai già partecipato con questa email!', true); return; }
+    } catch(e) { showMsg('Errore di rete. Riprova.', true); return; }
+
+    const p = personaTotale(vals);
+    try {
+      await window.firestoreAdd(window.firestoreCollection(window.db, 'pronostici'), {
+        nome, email: email.toLowerCase(), vals, tot,
+        persona: p ? p.label : '',
+        ts: Date.now()
+      });
+    } catch(e) { showMsg('Errore nel salvataggio. Riprova.', true); return; }
+
+    const label = p ? p.label.toLowerCase() : '';
+    showMsg(label
+      ? `Pronostico inviato! Sei un ${label}. Ci vediamo in classifica dopo il 18 maggio!`
+      : 'Pronostico inviato! Ci vediamo in classifica dopo il 18 maggio!');
+
+    document.getElementById('nome').value  = '';
+    document.getElementById('email').value = '';
+    [1,2,3,4,5].forEach(i => {
+      document.getElementById('g'+i).value = '';
+      document.getElementById('p'+i).textContent = '';
+      document.getElementById('p'+i).className = 'day-persona';
+    });
+    document.getElementById('tot-display').textContent = '—';
+    document.getElementById('tot-persona').innerHTML = '';
+    updateLbCount();
+  };
+
+  async function updateLbCount() {
+    if (!window.db) return;
+    try {
+      const snap = await window.firestoreGet(window.firestoreCollection(window.db, 'pronostici'));
+      const el = document.getElementById('lb-count');
+      if (el) el.textContent = snap.size > 0 ? '(' + snap.size + ')' : '';
+    } catch(e) {}
+  }
+
+  window.renderLb = async function() {
+    const list = document.getElementById('lb-list');
+    if (!window.db) {
+      list.innerHTML = '<p class="empty-state">Configura Firebase per vedere i pronostici.</p>';
+      return;
+    }
+    list.innerHTML = '<div class="loading">Caricamento...</div>';
+    try {
+      const q    = window.firestoreQuery(
+        window.firestoreCollection(window.db, 'pronostici'),
+        window.firestoreOrderBy('ts', 'desc')
+      );
+      const snap = await window.firestoreGet(q);
+      if (snap.empty) {
+        list.innerHTML = '<p class="empty-state">Nessun pronostico ancora — sii il primo!</p>';
+        return;
+      }
+      const clsFor = p => p && p.toLowerCase().includes('ottim') ? 'badge-ottimista'
+                        : p && p.toLowerCase().includes('pess')  ? 'badge-pessimista'
+                        : 'badge-equilib';
+      const rows = [];
+      snap.forEach((doc, i) => {
+        const e = doc.data();
+        rows.push(`
+          <div class="lb-row">
+            <span class="lb-rank">${rows.length+1}</span>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span class="lb-name">${escHtml(e.nome)}</span>
+                ${e.persona ? `<span class="${clsFor(e.persona)}" style="font-size:11px;padding:1px 7px">${escHtml(e.persona)}</span>` : ''}
+              </div>
+              <div class="lb-days">${(e.vals||[]).map((v,j) => GIORNI[j]+': '+v).join(' · ')}</div>
+            </div>
+            <span class="lb-tot">tot. <strong>${e.tot}</strong></span>
+          </div>`);
+      });
+      list.innerHTML = rows.join('');
+      const n = snap.size;
+      document.getElementById('lb-subtitle').textContent =
+        n + ' partecipant' + (n===1?'e':'i') + ' · classifica definitiva dopo il 18 maggio';
+      document.getElementById('lb-count').textContent = n > 0 ? '('+n+')' : '';
+    } catch(e) {
+      list.innerHTML = '<p class="empty-state">Errore nel caricamento. Riprova.</p>';
+    }
+  };
+
+  // Init count on load
+  setTimeout(() => { if(window.db) updateLbCount(); }, 1500);
+</script>
+</body>
+</html>
