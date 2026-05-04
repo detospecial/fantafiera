@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FantaFiera – Classifica · De Tomi Editore</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f7f5f2;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      border: 0.5px solid rgba(0,0,0,0.1);
+      padding: 2rem;
+    }
+
+    .header {
+      padding-bottom: 1.25rem;
+      border-bottom: 0.5px solid rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+    }
+    .header-top {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .header h1 { font-size: 20px; font-weight: 500; }
+    .badge-purple {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 9px;
+      border-radius: 8px;
+      background: #EEEDFE;
+      color: #3C3489;
+      font-weight: 500;
+    }
+    .header p { font-size: 14px; color: #555; line-height: 1.6; }
+
+    /* Stato fiera */
+    .stato-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .stato-giorno {
+      flex: 1;
+      min-width: 80px;
+      background: #f7f5f2;
+      border-radius: 10px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .stato-giorno.inserito { background: #F0FDF4; border: 0.5px solid #86EFAC; }
+    .stato-giorno.attesa   { background: #f7f5f2; border: 0.5px solid rgba(0,0,0,0.08); }
+    .sg-label { font-size: 11px; color: #888; }
+    .sg-val   { font-size: 16px; font-weight: 600; color: #1a1a1a; margin: 2px 0; }
+    .sg-val.attesa { color: #ccc; }
+    .sg-data  { font-size: 10px; color: #aaa; }
+
+    .totale-card {
+      background: #EEEDFE;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .totale-card .label { font-size: 13px; color: #3C3489; }
+    .totale-card .val   { font-size: 22px; font-weight: 600; color: #3C3489; }
+
+    /* Punteggio info */
+    .punteggio-info {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .pt-tag {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.1);
+      color: #555;
+    }
+    .pt-tag strong { color: #1a1a1a; }
+
+    /* Classifica header */
+    .classifica-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+    .classifica-header h2 { font-size: 15px; font-weight: 500; color: #555; }
+    .refresh-btn {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.15);
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      color: #555;
+    }
+    .refresh-btn:hover { background: #f2f0ed; }
+
+    /* Tabella */
+    .lb-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .lb-table th {
+      text-align: left;
+      font-size: 11px;
+      color: #aaa;
+      font-weight: 500;
+      padding: 0 8px 8px;
+      border-bottom: 0.5px solid rgba(0,0,0,0.08);
+    }
+    .lb-table th.right, .lb-table td.right { text-align: right; }
+    .lb-table td {
+      padding: 10px 8px;
+      border-bottom: 0.5px solid rgba(0,0,0,0.06);
+      vertical-align: middle;
+    }
+    .lb-table tr:last-child td { border-bottom: none; }
+    .lb-table tr:nth-child(1) td { background: #FFFBEB; }
+    .lb-table tr:nth-child(2) td { background: #F8FAFC; }
+    .lb-table tr:nth-child(3) td { background: #FFF7F0; }
+
+    .pts-badge {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 8px;
+      background: #EEEDFE;
+      color: #3C3489;
+    }
+    .pts-badge.gold   { background: #FEF3C7; color: #92400E; }
+    .pts-badge.silver { background: #F1F5F9; color: #475569; }
+    .pts-badge.bronze { background: #FEF0E7; color: #7C2D12; }
+    .pts-badge.zero   { background: #F1F5F9; color: #94A3B8; }
+
+    .tag-esatto { display:inline-block;font-size:10px;padding:1px 5px;border-radius:4px;background:#E1F5EE;color:#085041;font-weight:500;margin:1px; }
+    .tag-vicino { display:inline-block;font-size:10px;padding:1px 5px;border-radius:4px;background:#EEEDFE;color:#3C3489;font-weight:500;margin:1px; }
+    .tag-totale { display:inline-block;font-size:10px;padding:1px 5px;border-radius:4px;background:#FEF3C7;color:#92400E;font-weight:500;margin:1px; }
+
+    .day-breakdown { font-size: 11px; color: #aaa; margin-top: 3px; flex-wrap: wrap; }
+
+    .nome-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 3px; }
+    .nome     { font-weight: 500; font-size: 14px; }
+
+    .persona-badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .badge-ottimista  { background: #E1F5EE; color: #085041; }
+    .badge-pessimista { background: #FCEBEB; color: #791F1F; }
+    .badge-equilib    { background: #EEEDFE; color: #3C3489; }
+
+    .loading { font-size: 13px; color: #aaa; text-align: center; padding: 2rem 0; }
+    .empty   { font-size: 13px; color: #aaa; text-align: center; padding: 2rem 0; }
+
+    .aggiornato {
+      font-size: 11px;
+      color: #bbb;
+      text-align: center;
+      margin-top: 1.25rem;
+    }
+
+    .in-attesa-msg {
+      text-align: center;
+      padding: 2rem 0;
+      color: #aaa;
+      font-size: 14px;
+    }
+    .in-attesa-msg span { font-size: 32px; display: block; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-top">
+      <h1>FantaFiera – Classifica</h1>
+      <span class="badge-purple">Salone del Libro Edition</span>
+    </div>
+    <p>Segui la classifica in tempo reale. Chi ha pronosticato meglio le vendite di De Tomi Editore?</p>
+  </div>
+
+  <!-- Stato giorni -->
+  <div class="stato-bar">
+    <div class="stato-giorno" id="sg0">
+      <div class="sg-label">Giovedì</div>
+      <div class="sg-val attesa" id="sgv0">—</div>
+      <div class="sg-data">14 mag</div>
+    </div>
+    <div class="stato-giorno" id="sg1">
+      <div class="sg-label">Venerdì</div>
+      <div class="sg-val attesa" id="sgv1">—</div>
+      <div class="sg-data">15 mag</div>
+    </div>
+    <div class="stato-giorno" id="sg2">
+      <div class="sg-label">Sabato</div>
+      <div class="sg-val attesa" id="sgv2">—</div>
+      <div class="sg-data">16 mag</div>
+    </div>
+    <div class="stato-giorno" id="sg3">
+      <div class="sg-label">Domenica</div>
+      <div class="sg-val attesa" id="sgv3">—</div>
+      <div class="sg-data">17 mag</div>
+    </div>
+    <div class="stato-giorno" id="sg4">
+      <div class="sg-label">Lunedì</div>
+      <div class="sg-val attesa" id="sgv4">—</div>
+      <div class="sg-data">18 mag</div>
+    </div>
+  </div>
+
+  <!-- Totale -->
+  <div class="totale-card" id="totale-card" style="display:none">
+    <span class="label">Totale copie vendute finora</span>
+    <span class="val" id="totale-val">—</span>
+  </div>
+
+  <!-- Legenda punteggio -->
+  <div class="punteggio-info">
+    <span class="pt-tag"><strong>10 pt</strong> indovina il giorno esatto</span>
+    <span class="pt-tag"><strong>5 pt</strong> più vicino del giorno</span>
+    <span class="pt-tag"><strong>30 pt</strong> indovina il totale finale</span>
+  </div>
+
+  <!-- Classifica -->
+  <div class="classifica-header">
+    <h2 id="classifica-label">Classifica provvisoria</h2>
+    <button class="refresh-btn" onclick="init()">↻ Aggiorna</button>
+  </div>
+
+  <div id="classifica"><div class="loading">Caricamento...</div></div>
+
+  <div class="aggiornato" id="aggiornato"></div>
+
+</div>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey:            "AIzaSyD12zi_Sz0ThicEfBN_9ANzT1QzCFcZDmE",
+    authDomain:        "fantafiera-2026.firebaseapp.com",
+    projectId:         "fantafiera-2026",
+    storageBucket:     "fantafiera-2026.firebasestorage.app",
+    messagingSenderId: "176096748153",
+    appId:             "1:176096748153:web:060f0d71cb3b92db94eaa8"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const GIORNI = ['Gio','Ven','Sab','Dom','Lun'];
+
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  async function init() {
+    // Carica venduto
+    const venduto = [null, null, null, null, null];
+    try {
+      const vDoc = await db.collection('admin').doc('venduto').get();
+      if (vDoc.exists) {
+        const d = vDoc.data();
+        for (let i = 0; i < 5; i++) {
+          if (d['g'+i] !== undefined) venduto[i] = d['g'+i];
+        }
+      }
+    } catch(e) {}
+
+    // Aggiorna stato giorni
+    let tot = 0;
+    let giorniInseriti = 0;
+    for (let i = 0; i < 5; i++) {
+      if (venduto[i] !== null) {
+        document.getElementById('sgv'+i).textContent = venduto[i];
+        document.getElementById('sgv'+i).classList.remove('attesa');
+        document.getElementById('sg'+i).classList.add('inserito');
+        document.getElementById('sg'+i).classList.remove('attesa');
+        tot += venduto[i];
+        giorniInseriti++;
+      } else {
+        document.getElementById('sgv'+i).textContent = '—';
+        document.getElementById('sgv'+i).classList.add('attesa');
+        document.getElementById('sg'+i).classList.remove('inserito');
+      }
+    }
+
+    if (giorniInseriti > 0) {
+      document.getElementById('totale-card').style.display = 'flex';
+      document.getElementById('totale-val').textContent = tot;
+    }
+
+    if (giorniInseriti === 5) {
+      document.getElementById('classifica-label').textContent = 'Classifica finale';
+    }
+
+    // Carica pronostici
+    try {
+      const snap = await db.collection('pronostici').get();
+
+      if (giorniInseriti === 0) {
+        document.getElementById('classifica').innerHTML = `
+          <div class="in-attesa-msg">
+            <span>⏳</span>
+            La fiera non è ancora iniziata.<br>La classifica apparirà dopo il primo giorno.
+          </div>`;
+        aggiornaTimestamp();
+        return;
+      }
+
+      if (snap.empty) {
+        document.getElementById('classifica').innerHTML = '<p class="empty">Nessun pronostico ancora.</p>';
+        return;
+      }
+
+      const partecipanti = [];
+      snap.forEach(doc => {
+        const p = doc.data();
+        if (!p.vals || p.vals.length < 5) return;
+        partecipanti.push({ nome: p.nome, vals: p.vals, tot: p.tot, persona: p.persona || '', punti: 0, tags: [] });
+      });
+
+      // Punti esatti per giorno
+      for (let i = 0; i < 5; i++) {
+        if (venduto[i] === null) continue;
+        partecipanti.forEach(p => {
+          if (p.vals[i] === venduto[i]) {
+            p.punti += 10;
+            p.tags.push({ giorno: i, tipo: 'esatto' });
+          }
+        });
+      }
+
+      // Punti più vicino per giorno
+      for (let i = 0; i < 5; i++) {
+        if (venduto[i] === null) continue;
+        const nonEsatti = partecipanti.filter(p => p.vals[i] !== venduto[i]);
+        if (nonEsatti.length === 0) continue;
+        const distMin = Math.min(...nonEsatti.map(p => Math.abs(p.vals[i] - venduto[i])));
+        nonEsatti.forEach(p => {
+          if (Math.abs(p.vals[i] - venduto[i]) === distMin) {
+            p.punti += 5;
+            p.tags.push({ giorno: i, tipo: 'vicino' });
+          }
+        });
+      }
+
+      // Bonus totale (solo se tutti i giorni inseriti)
+      if (giorniInseriti === 5) {
+        partecipanti.forEach(p => {
+          if (p.tot === tot) {
+            p.punti += 30;
+            p.tags.push({ giorno: -1, tipo: 'totale' });
+          }
+        });
+      }
+
+      // Ordina
+      partecipanti.sort((a, b) => b.punti - a.punti);
+
+      const rankEmoji = ['🥇', '🥈', '🥉'];
+      const ptsCls    = ['gold', 'silver', 'bronze'];
+
+      const clsForPersona = p =>
+        p && p.toLowerCase().includes('ottim') ? 'badge-ottimista' :
+        p && p.toLowerCase().includes('pess')  ? 'badge-pessimista' : 'badge-equilib';
+
+      let html = `<table class="lb-table">
+        <thead>
+          <tr>
+            <th style="width:36px">#</th>
+            <th>Partecipante</th>
+            <th class="right" style="width:80px">Punti</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+      partecipanti.forEach((p, i) => {
+        const rank    = i < 3 ? rankEmoji[i] : (i + 1);
+        const ptsClass = p.punti === 0 ? 'zero' : (i < 3 ? ptsCls[i] : '');
+
+        const tagsHtml = p.tags.map(t => {
+          if (t.tipo === 'totale') return `<span class="tag-totale">🏆 totale</span>`;
+          if (t.tipo === 'esatto') return `<span class="tag-esatto">✓ ${GIORNI[t.giorno]}</span>`;
+          if (t.tipo === 'vicino') return `<span class="tag-vicino">~ ${GIORNI[t.giorno]}</span>`;
+          return '';
+        }).join('');
+
+        const giorniHtml = p.vals.map((v, j) => {
+          if (venduto[j] === null) return `<span style="color:#ddd">${GIORNI[j]}: ${v}</span>`;
+          const diff  = v - venduto[j];
+          const color = diff === 0 ? '#085041' : Math.abs(diff) <= 10 ? '#3C3489' : '#bbb';
+          const sign  = diff > 0 ? '+' : '';
+          return `<span style="color:${color}">${GIORNI[j]}: ${v}<sup style="font-size:9px">${sign}${diff}</sup></span>`;
+        }).join(' · ');
+
+        const personaHtml = p.persona
+          ? `<span class="persona-badge ${clsForPersona(p.persona)}">${escHtml(p.persona)}</span>` : '';
+
+        html += `<tr>
+          <td style="font-size:${i<3?'20':'14'}px;text-align:center">${rank}</td>
+          <td>
+            <div class="nome-row">
+              <span class="nome">${escHtml(p.nome)}</span>
+              ${personaHtml}
+              ${tagsHtml}
+            </div>
+            <div class="day-breakdown">${giorniHtml} · pronostico tot: <strong>${p.tot}</strong></div>
+          </td>
+          <td class="right"><span class="pts-badge ${ptsClass}">${p.punti} pt</span></td>
+        </tr>`;
+      });
+
+      html += `</tbody></table>`;
+
+      if (giorniInseriti < 5) {
+        html += `<p style="font-size:11px;color:#bbb;text-align:center;margin-top:14px">
+          Giorni completati: ${giorniInseriti}/5 · Il bonus da 30 pt sul totale viene assegnato a fine fiera (18 maggio)
+        </p>`;
+      }
+
+      document.getElementById('classifica').innerHTML = html;
+      aggiornaTimestamp();
+
+    } catch(e) {
+      document.getElementById('classifica').innerHTML = '<p class="empty">Errore nel caricamento. Riprova.</p>';
+    }
+  }
+
+  function aggiornaTimestamp() {
+    const ora = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('aggiornato').textContent = 'Ultimo aggiornamento: ' + ora;
+  }
+
+  // Aggiornamento automatico ogni 60 secondi
+  init();
+  setInterval(init, 60000);
+</script>
+</body>
+</html>
