@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FantaFiera Admin · De Tomi Editore</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f7f5f2;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 16px;
+      border: 0.5px solid rgba(0,0,0,0.1);
+      padding: 2rem;
+    }
+
+    /* PIN screen */
+    #pin-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 2rem 0;
+    }
+    #pin-screen h2 { font-size: 18px; font-weight: 500; }
+    #pin-screen p  { font-size: 13px; color: #888; }
+    #pin-input {
+      width: 160px;
+      height: 48px;
+      text-align: center;
+      font-size: 24px;
+      letter-spacing: 8px;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      border-radius: 10px;
+      outline: none;
+    }
+    #pin-input:focus { border-color: rgba(83,74,183,0.6); box-shadow: 0 0 0 3px rgba(83,74,183,0.1); }
+    #pin-btn {
+      padding: 8px 28px;
+      font-size: 14px;
+      font-family: inherit;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      background: transparent;
+      cursor: pointer;
+    }
+    #pin-btn:hover { background: #f2f0ed; }
+    #pin-err { font-size: 13px; color: #A32D2D; min-height: 18px; }
+
+    /* Main */
+    #main { display: none; }
+
+    .header {
+      padding-bottom: 1.25rem;
+      border-bottom: 0.5px solid rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+    }
+    .header-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+    .header h1  { font-size: 20px; font-weight: 500; }
+    .badge-admin { display: inline-block; font-size: 11px; padding: 2px 9px; border-radius: 8px; background: #FEF3EE; color: #8C3A1A; font-weight: 500; }
+
+    /* Venduto grid */
+    .section-title { font-size: 13px; color: #888; margin-bottom: 10px; }
+    .venduto-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .venduto-card {
+      background: #fff;
+      border: 0.5px solid rgba(0,0,0,0.1);
+      border-radius: 12px;
+      padding: 0.875rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .venduto-card.filled { border-color: #3C3489; background: #FAFAFE; }
+    .v-label { font-size: 13px; color: #555; font-weight: 500; }
+    .v-date  { font-size: 11px; color: #999; }
+    .v-input {
+      width: 100%;
+      height: 36px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+      font-family: inherit;
+      border: 0.5px solid rgba(0,0,0,0.15);
+      border-radius: 8px;
+      outline: none;
+    }
+    .v-input:focus { border-color: rgba(83,74,183,0.6); }
+    .v-input:disabled { background: #f5f4ff; color: #3C3489; font-weight: 600; border-color: #c5c2f0; }
+    .v-saved { font-size: 11px; color: #3C3489; font-weight: 500; min-height: 14px; }
+
+    .save-btn {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.2);
+      background: transparent;
+      color: #1a1a1a;
+      margin-bottom: 0.5rem;
+    }
+    .save-btn:hover  { background: #f2f0ed; }
+    .save-btn:active { transform: scale(0.98); }
+
+    #save-msg { font-size: 13px; color: #0F6E56; text-align: center; min-height: 18px; margin-bottom: 1.5rem; }
+    #save-msg.err { color: #A32D2D; }
+
+    /* Classifica */
+    .classifica-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-top: 1.5rem;
+      border-top: 0.5px solid rgba(0,0,0,0.08);
+    }
+    .classifica-header h2 { font-size: 16px; font-weight: 500; }
+    .refresh-btn {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 8px;
+      border: 0.5px solid rgba(0,0,0,0.15);
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      color: #555;
+    }
+    .refresh-btn:hover { background: #f2f0ed; }
+
+    .lb-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .lb-table th {
+      text-align: left;
+      font-size: 11px;
+      color: #aaa;
+      font-weight: 500;
+      padding: 0 8px 8px;
+      border-bottom: 0.5px solid rgba(0,0,0,0.08);
+    }
+    .lb-table th.right, .lb-table td.right { text-align: right; }
+    .lb-table td {
+      padding: 8px;
+      border-bottom: 0.5px solid rgba(0,0,0,0.06);
+      color: #1a1a1a;
+      vertical-align: middle;
+    }
+    .lb-table tr:last-child td { border-bottom: none; }
+    .rank-1 { font-size: 16px; }
+    .rank-2 { font-size: 14px; }
+    .rank-3 { font-size: 13px; }
+    .pts-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: #EEEDFE;
+      color: #3C3489;
+    }
+    .pts-badge.gold   { background: #FEF3C7; color: #92400E; }
+    .pts-badge.silver { background: #F1F5F9; color: #475569; }
+    .pts-badge.bronze { background: #FEF0E7; color: #92400E; }
+    .day-breakdown { font-size: 11px; color: #aaa; }
+    .tag-esatto  { display:inline-block;font-size:10px;padding:1px 5px;border-radius:4px;background:#E1F5EE;color:#085041;font-weight:500;margin-left:3px; }
+    .tag-vicino  { display:inline-block;font-size:10px;padding:1px 5px;border-radius:4px;background:#EEEDFE;color:#3C3489;font-weight:500;margin-left:3px; }
+    .tag-totale  { display:inline-block;font-size:10px;padding:1px 5px;border-radius:4px;background:#FEF3C7;color:#92400E;font-weight:500;margin-left:3px; }
+
+    .loading { font-size: 13px; color: #aaa; text-align: center; padding: 1.5rem 0; }
+    .empty   { font-size: 13px; color: #aaa; text-align: center; padding: 1.5rem 0; }
+
+    .totale-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f7f5f2;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 1.25rem;
+      font-size: 14px;
+    }
+    .totale-row span { color: #555; }
+    .totale-row strong { font-size: 18px; color: #1a1a1a; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- PIN SCREEN -->
+  <div id="pin-screen">
+    <h2>FantaFiera Admin</h2>
+    <p>Inserisci il PIN per accedere</p>
+    <input type="password" id="pin-input" maxlength="6" placeholder="••••" inputmode="numeric">
+    <button id="pin-btn" onclick="checkPin()">Entra</button>
+    <div id="pin-err"></div>
+  </div>
+
+  <!-- MAIN ADMIN -->
+  <div id="main">
+
+    <div class="header">
+      <div class="header-top">
+        <h1>FantaFiera Admin</h1>
+        <span class="badge-admin">Solo uso interno</span>
+      </div>
+      <p style="font-size:14px;color:#555">Inserisci il venduto reale giorno per giorno. La classifica si aggiorna automaticamente.</p>
+    </div>
+
+    <!-- Totale accumulato -->
+    <div class="totale-row">
+      <span>Totale venduto accumulato</span>
+      <strong id="tot-accumulato">—</strong>
+    </div>
+
+    <!-- Venduto giornaliero -->
+    <p class="section-title">Venduto reale per giorno</p>
+    <div class="venduto-grid">
+      <div class="venduto-card" id="vc0">
+        <span class="v-label">Giovedì</span>
+        <span class="v-date">14 maggio</span>
+        <input type="number" class="v-input" id="v0" min="0" max="9999" placeholder="—">
+        <span class="v-saved" id="vs0"></span>
+      </div>
+      <div class="venduto-card" id="vc1">
+        <span class="v-label">Venerdì</span>
+        <span class="v-date">15 maggio</span>
+        <input type="number" class="v-input" id="v1" min="0" max="9999" placeholder="—">
+        <span class="v-saved" id="vs1"></span>
+      </div>
+      <div class="venduto-card" id="vc2">
+        <span class="v-label">Sabato</span>
+        <span class="v-date">16 maggio</span>
+        <input type="number" class="v-input" id="v2" min="0" max="9999" placeholder="—">
+        <span class="v-saved" id="vs2"></span>
+      </div>
+      <div class="venduto-card" id="vc3">
+        <span class="v-label">Domenica</span>
+        <span class="v-date">17 maggio</span>
+        <input type="number" class="v-input" id="v3" min="0" max="9999" placeholder="—">
+        <span class="v-saved" id="vs3"></span>
+      </div>
+      <div class="venduto-card" id="vc4">
+        <span class="v-label">Lunedì</span>
+        <span class="v-date">18 maggio</span>
+        <input type="number" class="v-input" id="v4" min="0" max="9999" placeholder="—">
+        <span class="v-saved" id="vs4"></span>
+      </div>
+    </div>
+
+    <button class="save-btn" onclick="salvaVenduto()">Salva venduto e aggiorna classifica</button>
+    <div id="save-msg"></div>
+
+    <!-- Classifica -->
+    <div class="classifica-header">
+      <h2>Classifica provvisoria</h2>
+      <button class="refresh-btn" onclick="renderClassifica()">↻ Aggiorna</button>
+    </div>
+    <div id="classifica"><div class="loading">Caricamento...</div></div>
+
+  </div>
+</div>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // ============================================================
+  // CAMBIA QUESTO PIN CON IL TUO
+  const PIN_SEGRETO = '1234';
+  // ============================================================
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyD12zi_Sz0ThicEfBN_9ANzT1QzCFcZDmE",
+    authDomain:        "fantafiera-2026.firebaseapp.com",
+    projectId:         "fantafiera-2026",
+    storageBucket:     "fantafiera-2026.firebasestorage.app",
+    messagingSenderId: "176096748153",
+    appId:             "1:176096748153:web:060f0d71cb3b92db94eaa8"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const GIORNI = ['Gio','Ven','Sab','Dom','Lun'];
+
+  // PIN
+  document.getElementById('pin-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPin();
+  });
+
+  function checkPin() {
+    const val = document.getElementById('pin-input').value.trim();
+    if (val === PIN_SEGRETO) {
+      document.getElementById('pin-screen').style.display = 'none';
+      document.getElementById('main').style.display = 'block';
+      caricaVenduto();
+      renderClassifica();
+    } else {
+      document.getElementById('pin-err').textContent = 'PIN errato. Riprova.';
+      document.getElementById('pin-input').value = '';
+    }
+  }
+
+  // Carica venduto salvato
+  async function caricaVenduto() {
+    try {
+      const doc = await db.collection('admin').doc('venduto').get();
+      if (doc.exists) {
+        const data = doc.data();
+        let tot = 0;
+        for (let i = 0; i < 5; i++) {
+          if (data['g'+i] !== undefined && data['g'+i] !== null) {
+            const val = data['g'+i];
+            document.getElementById('v'+i).value = val;
+            document.getElementById('v'+i).disabled = false;
+            document.getElementById('vs'+i).textContent = '✓ salvato';
+            document.getElementById('vc'+i).classList.add('filled');
+            tot += val;
+          }
+        }
+        document.getElementById('tot-accumulato').textContent = tot > 0 ? tot : '—';
+      }
+    } catch(e) {}
+  }
+
+  // Salva venduto
+  async function salvaVenduto() {
+    const dati = {};
+    let tot = 0;
+    let almeno = false;
+    for (let i = 0; i < 5; i++) {
+      const raw = document.getElementById('v'+i).value;
+      if (raw !== '' && raw !== null) {
+        const val = Math.max(0, parseInt(raw) || 0);
+        dati['g'+i] = val;
+        tot += val;
+        almeno = true;
+      }
+    }
+    if (!almeno) { showSaveMsg('Inserisci almeno un giorno.', true); return; }
+
+    try {
+      await db.collection('admin').doc('venduto').set(dati, { merge: true });
+      // Aggiorna UI
+      for (let i = 0; i < 5; i++) {
+        if (dati['g'+i] !== undefined) {
+          document.getElementById('vs'+i).textContent = '✓ salvato';
+          document.getElementById('vc'+i).classList.add('filled');
+        }
+      }
+      document.getElementById('tot-accumulato').textContent = tot;
+      showSaveMsg('Salvato! Classifica aggiornata.');
+      renderClassifica();
+    } catch(e) {
+      showSaveMsg('Errore nel salvataggio. Riprova.', true);
+    }
+  }
+
+  function showSaveMsg(txt, err) {
+    const el = document.getElementById('save-msg');
+    el.textContent = txt;
+    el.className = err ? 'err' : '';
+    setTimeout(() => { el.textContent = ''; }, 3000);
+  }
+
+  // Calcola punteggio
+  function calcolaPunteggio(pronostico, venduto) {
+    // venduto = array dei giorni reali (null se non ancora inserito)
+    // pronostico = { vals: [g0,g1,g2,g3,g4], tot }
+    let punti = 0;
+    const breakdown = []; // descrizione punti per giorno
+
+    for (let i = 0; i < 5; i++) {
+      if (venduto[i] === null || venduto[i] === undefined) continue;
+      breakdown.push({ giorno: i, pronostico: pronostico.vals[i], reale: venduto[i] });
+    }
+
+    return { punti, breakdown };
+  }
+
+  // Render classifica
+  async function renderClassifica() {
+    const el = document.getElementById('classifica');
+    el.innerHTML = '<div class="loading">Caricamento...</div>';
+
+    try {
+      // Carica venduto
+      const vDoc = await db.collection('admin').doc('venduto').get();
+      const venduto = [null, null, null, null, null];
+      if (vDoc.exists) {
+        const d = vDoc.data();
+        for (let i = 0; i < 5; i++) {
+          if (d['g'+i] !== undefined) venduto[i] = d['g'+i];
+        }
+      }
+
+      const totReale = venduto.reduce((a, v) => a + (v !== null ? v : 0), 0);
+      const giorniInseriti = venduto.filter(v => v !== null).length;
+
+      if (giorniInseriti === 0) {
+        el.innerHTML = '<p class="empty">Inserisci almeno un giorno per vedere la classifica.</p>';
+        return;
+      }
+
+      // Carica pronostici
+      const snap = await db.collection('pronostici').get();
+      if (snap.empty) {
+        el.innerHTML = '<p class="empty">Nessun pronostico ancora.</p>';
+        return;
+      }
+
+      const partecipanti = [];
+      snap.forEach(doc => {
+        const p = doc.data();
+        if (!p.vals || p.vals.length < 5) return;
+
+        let punti = 0;
+        const tags = [];
+
+        // Punti per ogni giorno inserito
+        for (let i = 0; i < 5; i++) {
+          if (venduto[i] === null) continue;
+          if (p.vals[i] === venduto[i]) {
+            punti += 10;
+            tags.push({ giorno: i, tipo: 'esatto' });
+          }
+        }
+
+        // Punti "più vicino" per ogni giorno (calcolati dopo su tutti)
+        partecipanti.push({ nome: p.nome, vals: p.vals, tot: p.tot, punti, tags, email: p.email });
+      });
+
+      // Per ogni giorno inserito, assegna 5 punti al più vicino (se non ha già 10)
+      for (let i = 0; i < 5; i++) {
+        if (venduto[i] === null) continue;
+
+        // Trova distanza minima tra chi NON ha indovinato esattamente
+        const nonEsatti = partecipanti.filter(p => p.vals[i] !== venduto[i]);
+        if (nonEsatti.length === 0) continue;
+
+        const distMin = Math.min(...nonEsatti.map(p => Math.abs(p.vals[i] - venduto[i])));
+        nonEsatti.forEach(p => {
+          if (Math.abs(p.vals[i] - venduto[i]) === distMin) {
+            p.punti += 5;
+            p.tags.push({ giorno: i, tipo: 'vicino' });
+          }
+        });
+      }
+
+      // Bonus 30 punti totale (solo se tutti i giorni sono inseriti)
+      if (giorniInseriti === 5) {
+        partecipanti.forEach(p => {
+          if (p.tot === totReale) {
+            p.punti += 30;
+            p.tags.push({ giorno: -1, tipo: 'totale' });
+          }
+        });
+      }
+
+      // Ordina per punti decrescenti
+      partecipanti.sort((a, b) => b.punti - a.punti);
+
+      // Render tabella
+      const rankEmoji = ['🥇', '🥈', '🥉'];
+      const ptsCls    = ['gold', 'silver', 'bronze'];
+
+      let html = `<table class="lb-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Partecipante</th>
+            <th>Pronostico giorni</th>
+            <th class="right">Punti</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+      partecipanti.forEach((p, i) => {
+        const rank = i < 3 ? rankEmoji[i] : (i + 1);
+        const ptsClass = i < 3 ? ptsCls[i] : '';
+
+        const tagsHtml = p.tags.map(t => {
+          if (t.tipo === 'totale') return `<span class="tag-totale">totale ✓</span>`;
+          if (t.tipo === 'esatto') return `<span class="tag-esatto">${GIORNI[t.giorno]} esatto</span>`;
+          if (t.tipo === 'vicino') return `<span class="tag-vicino">${GIORNI[t.giorno]} vicino</span>`;
+          return '';
+        }).join('');
+
+        const giorniHtml = p.vals.map((v, j) => {
+          if (venduto[j] === null) return `<span style="color:#ccc">${GIORNI[j]}: ${v}</span>`;
+          const diff = v - venduto[j];
+          const color = diff === 0 ? '#085041' : Math.abs(diff) <= 5 ? '#3C3489' : '#aaa';
+          const sign  = diff > 0 ? '+' : '';
+          return `<span style="color:${color}">${GIORNI[j]}: ${v}<sup style="font-size:9px">${sign}${diff}</sup></span>`;
+        }).join(' · ');
+
+        html += `<tr>
+          <td style="font-size:${i<3?'18':'14'}px">${rank}</td>
+          <td>
+            <div style="font-weight:500;margin-bottom:3px">${escHtml(p.nome)} ${tagsHtml}</div>
+            <div class="day-breakdown">${giorniHtml}</div>
+          </td>
+          <td style="font-size:13px;color:#666;vertical-align:top;padding-top:10px">tot: <strong>${p.tot}</strong></td>
+          <td class="right"><span class="pts-badge ${ptsClass}">${p.punti} pt</span></td>
+        </tr>`;
+      });
+
+      html += `</tbody></table>`;
+
+      if (giorniInseriti < 5) {
+        html += `<p style="font-size:11px;color:#aaa;text-align:center;margin-top:12px">
+          Giorni inseriti: ${giorniInseriti}/5 · Il bonus da 30 punti sul totale verrà assegnato a fine fiera.
+        </p>`;
+      }
+
+      el.innerHTML = html;
+
+    } catch(e) {
+      el.innerHTML = '<p class="empty">Errore nel caricamento. Riprova.</p>';
+      console.error(e);
+    }
+  }
+
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
