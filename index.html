@@ -495,7 +495,7 @@
   // Blocca il form dal 13 maggio 2025 in poi
   function verificaScadenza() {
     const oggi = new Date();
-    const scadenza = new Date('2025-05-13T00:00:00');
+    const scadenza = new Date('2026-05-13T00:00:00');
     if (oggi >= scadenza) {
       const formTab = document.querySelector('.tab');
       if (formTab) { formTab.style.opacity = '0.4'; formTab.style.pointerEvents = 'none'; }
