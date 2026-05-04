@@ -323,15 +323,11 @@
 
 </div>
 
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!-- Firebase compat SDK (no moduli ES, tutto sincrono) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
-  // ============================================================
-  // SOSTITUISCI QUI CON LE TUE CREDENZIALI FIREBASE
-  // (Firebase Console → Progetto → Impostazioni → App web)
-  // ============================================================
+<script>
   const firebaseConfig = {
     apiKey:            "AIzaSyD12zi_Sz0ThicEfBN_9ANzT1QzCFcZDmE",
     authDomain:        "fantafiera-2026.firebaseapp.com",
@@ -340,37 +336,10 @@
     messagingSenderId: "176096748153",
     appId:             "1:176096748153:web:060f0d71cb3b92db94eaa8"
   };
-  // ============================================================
 
-  const SOGLIE = [25, 100, 150, 100, 50];
-  const GIORNI = ['Gio','Ven','Sab','Dom','Lun'];
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
 
-  let db;
-  try {
-    const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-  } catch(e) {
-    document.getElementById('config-notice').style.display = 'block';
-  }
-
-  // Esponi funzioni al contesto globale
-  window.SOGLIE = SOGLIE;
-  window.GIORNI = GIORNI;
-  window.db = db;
-  window.firestoreAdd = addDoc;
-  window.firestoreQuery = query;
-  window.firestoreGet = getDocs;
-  window.firestoreCollection = collection;
-  window.firestoreOrderBy = orderBy;
-  window.firestoreWhere = where;
-  window.firebaseReady = true;
-
-  if (document.getElementById('tab-lb').style.display !== 'none') {
-    window.renderLb();
-  }
-</script>
-
-<script>
   const SOGLIE = [25, 100, 150, 100, 50];
   const GIORNI = ['Gio','Ven','Sab','Dom','Lun'];
 
@@ -392,14 +361,14 @@
     return { label: 'Equilibrato', cls: 'badge-equilib' };
   }
 
-  window.onDayInput = function(idx) {
+  function onDayInput(idx) {
     const val = getVal(idx);
     const el  = document.getElementById('p'+(idx+1));
     const p   = personaDay(val, SOGLIE[idx]);
     if (p) { el.textContent = p.label; el.className = 'day-persona ' + p.cls; }
     else   { el.textContent = ''; el.className = 'day-persona'; }
     calcTot();
-  };
+  }
 
   function calcTot() {
     const vals = [0,1,2,3,4].map(i => getVal(i));
@@ -411,14 +380,14 @@
     return { vals, tot };
   }
 
-  window.switchTab = function(t) {
+  function switchTab(t) {
     document.querySelectorAll('.tab').forEach((b,i) =>
       b.classList.toggle('active', (i===0&&t==='form') || (i===1&&t==='lb'))
     );
     document.getElementById('tab-form').style.display = t === 'form' ? 'block' : 'none';
     document.getElementById('tab-lb').style.display   = t === 'lb'   ? 'block' : 'none';
     if (t === 'lb') renderLb();
-  };
+  }
 
   function showMsg(txt, err) {
     const el = document.getElementById('msg');
@@ -429,31 +398,27 @@
   function validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
   function escHtml(s)    { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  window.submit = async function() {
+  async function submit() {
     const nome  = document.getElementById('nome').value.trim();
     const email = document.getElementById('email').value.trim();
-    if (!nome)                    { showMsg('Inserisci il tuo nome o nickname.', true); return; }
-    if (!email || !validEmail(email)) { showMsg('Inserisci un indirizzo email valido.', true); return; }
+    if (!nome)                         { showMsg('Inserisci il tuo nome o nickname.', true); return; }
+    if (!email || !validEmail(email))  { showMsg('Inserisci un indirizzo email valido.', true); return; }
 
     const { vals, tot } = calcTot();
     if (vals.every(v => v === 0)) { showMsg('Inserisci almeno un pronostico giornaliero.', true); return; }
 
-    if (!window.db) { showMsg('Configura Firebase per salvare i dati.', true); return; }
-
-    // Controlla email duplicata
     try {
-      const q   = window.firestoreQuery(
-        window.firestoreCollection(window.db, 'pronostici'),
-        window.firestoreWhere('email', '==', email.toLowerCase())
-      );
-      const snap = await window.firestoreGet(q);
+      const snap = await db.collection('pronostici').where('email', '==', email.toLowerCase()).get();
       if (!snap.empty) { showMsg('Hai già partecipato con questa email!', true); return; }
     } catch(e) { showMsg('Errore di rete. Riprova.', true); return; }
 
     const p = personaTotale(vals);
     try {
-      await window.firestoreAdd(window.firestoreCollection(window.db, 'pronostici'), {
-        nome, email: email.toLowerCase(), vals, tot,
+      await db.collection('pronostici').add({
+        nome,
+        email: email.toLowerCase(),
+        vals,
+        tot,
         persona: p ? p.label : '',
         ts: Date.now()
       });
@@ -474,30 +439,21 @@
     document.getElementById('tot-display').textContent = '—';
     document.getElementById('tot-persona').innerHTML = '';
     updateLbCount();
-  };
+  }
 
   async function updateLbCount() {
-    if (!window.db) return;
     try {
-      const snap = await window.firestoreGet(window.firestoreCollection(window.db, 'pronostici'));
+      const snap = await db.collection('pronostici').get();
       const el = document.getElementById('lb-count');
       if (el) el.textContent = snap.size > 0 ? '(' + snap.size + ')' : '';
     } catch(e) {}
   }
 
-  window.renderLb = async function() {
+  async function renderLb() {
     const list = document.getElementById('lb-list');
-    if (!window.db) {
-      list.innerHTML = '<p class="empty-state">Configura Firebase per vedere i pronostici.</p>';
-      return;
-    }
     list.innerHTML = '<div class="loading">Caricamento...</div>';
     try {
-      const q    = window.firestoreQuery(
-        window.firestoreCollection(window.db, 'pronostici'),
-        window.firestoreOrderBy('ts', 'desc')
-      );
-      const snap = await window.firestoreGet(q);
+      const snap = await db.collection('pronostici').orderBy('ts', 'desc').get();
       if (snap.empty) {
         list.innerHTML = '<p class="empty-state">Nessun pronostico ancora — sii il primo!</p>';
         return;
@@ -506,7 +462,7 @@
                         : p && p.toLowerCase().includes('pess')  ? 'badge-pessimista'
                         : 'badge-equilib';
       const rows = [];
-      snap.forEach((doc, i) => {
+      snap.forEach(doc => {
         const e = doc.data();
         rows.push(`
           <div class="lb-row">
@@ -529,10 +485,15 @@
     } catch(e) {
       list.innerHTML = '<p class="empty-state">Errore nel caricamento. Riprova.</p>';
     }
-  };
+  }
 
-  // Init count on load
-  setTimeout(() => { if(window.db) updateLbCount(); }, 1500);
+  // Esponi al DOM
+  window.onDayInput  = onDayInput;
+  window.switchTab   = switchTab;
+  window.submit      = submit;
+
+  // Init
+  updateLbCount();
 </script>
 </body>
 </html>
