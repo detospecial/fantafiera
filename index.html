@@ -492,8 +492,21 @@
   window.switchTab   = switchTab;
   window.submit      = submit;
 
+  // Blocca il form dal 13 maggio 2025 in poi
+  function verificaScadenza() {
+    const oggi = new Date();
+    const scadenza = new Date('2025-05-13T00:00:00');
+    if (oggi >= scadenza) {
+      const formTab = document.querySelector('.tab');
+      if (formTab) { formTab.style.opacity = '0.4'; formTab.style.pointerEvents = 'none'; }
+      document.getElementById('tab-form').innerHTML = '<div style="text-align:center;padding:2.5rem 1rem"><div style="font-size:36px;margin-bottom:12px">\u23F0</div><p style="font-size:16px;font-weight:500;color:#1a1a1a;margin-bottom:8px">I pronostici sono chiusi</p><p style="font-size:14px;color:#888">Le iscrizioni si sono chiuse il 13 maggio.<br>Segui la classifica nella tab accanto!</p></div>';
+      switchTab('lb');
+    }
+  }
+
   // Init
   updateLbCount();
+  verificaScadenza();
 </script>
 </body>
 </html>
