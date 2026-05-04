@@ -309,12 +309,12 @@
 
     <button class="submit-btn" onclick="submit()">Invia il mio pronostico</button>
     <div id="msg"></div>
-    <p class="fine-print">La classifica finale verrà stilata dopo il 18 maggio.</p>
+    <p class="fine-print">Segui la classifica in tempo reale nella tab "Pronostici"!</p>
   </div>
 
   <!-- LEADERBOARD TAB -->
   <div id="tab-lb" style="display:none">
-    <p class="info-line" id="lb-subtitle">Partecipanti · classifica definitiva dopo il 18 maggio</p>
+    <p class="info-line" id="lb-subtitle">Partecipanti · segui la classifica in tempo reale</p>
     <div id="lb-list"><div class="loading">Caricamento...</div></div>
     <p style="font-size:12px;color:#bbb;margin-top:1rem;text-align:center">
       La posizione finale sarà calcolata confrontando il totale reale con quello di ciascun partecipante.
@@ -426,8 +426,8 @@
 
     const label = p ? p.label.toLowerCase() : '';
     showMsg(label
-      ? `Pronostico inviato! Sei un ${label}. Ci vediamo in classifica dopo il 18 maggio!`
-      : 'Pronostico inviato! Ci vediamo in classifica dopo il 18 maggio!');
+      ? `Pronostico inviato! Sei un ${label}. Segui la classifica in tempo reale nella tab accanto!`
+      : 'Pronostico inviato! Segui la classifica in tempo reale nella tab accanto!');
 
     document.getElementById('nome').value  = '';
     document.getElementById('email').value = '';
@@ -480,7 +480,7 @@
       list.innerHTML = rows.join('');
       const n = snap.size;
       document.getElementById('lb-subtitle').textContent =
-        n + ' partecipant' + (n===1?'e':'i') + ' · classifica definitiva dopo il 18 maggio';
+        n + ' partecipant' + (n===1?'e':'i') + ' · segui la classifica in tempo reale';
       document.getElementById('lb-count').textContent = n > 0 ? '('+n+')' : '';
     } catch(e) {
       list.innerHTML = '<p class="empty-state">Errore nel caricamento. Riprova.</p>';
